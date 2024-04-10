@@ -41,12 +41,12 @@ export async function GET() {
       line_items: [
         {
           price_data: {
-            currency: 'USD',
+            currency: 'INR',
             product_data: {
               name: 'DocsGPT Pro',
               description: 'Unlimited PDF uploads!',
             },
-            unit_amount: 2000,
+            unit_amount: 199,
             recurring: {
               interval: 'month',
             },

@@ -1,8 +1,17 @@
-# ChatPDF Clone
+# DocsGPT - Chat With Docs Using LLM
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Falexkuang0%2Fchatpdf&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,DATABASE_URL,NEXT_PUBLIC_S3_ACCESS_KEY_ID,NEXT_PUBLIC_S3_SECRET_ACCESS_KEY,NEXT_PUBLIC_S3_BUCKET_NAME,NEXT_PUBLIC_S3_REGION&envDescription=More%20environment%20variables%20examples&envLink=https%3A%2F%2Fgithub.com%2Falexkuang0%2Fchatpdf%2Fblob%2Fmain%2F.env.example&project-name=chatpdf-clone&repository-name=chatpdf-clone)
+## Project Group Members
+- Arjun Kadam
+- Simran Pathan
+- Vaibhav Pandarkar
+- Vaishnavi Raykar
 
-A ChatPDF clone using:
+## Mentor 
+- Prof. Swati Bhosale
+
+## Tech Stack
+
+A DocsGPT using:
 
 - Next.js 13 (App Router) in TypeScript
 - Database
@@ -46,15 +55,3 @@ pnpm run build
 pnpm run start
 ```
 
-## Acknowledgement
-
-This repo is a walkthrough demo based Elliott Chong's video: https://www.youtube.com/watch?v=bZFedu-0emE
-
-However, I made following changes:
-
-- refreshed SDK versions and related code
-- dropped usage of React Query due to error, used fetch API instead
-- dropped usage of edge runtime for routes due to error running latest Pinecone SDK at edge
-- reorganized some parts of the code
-- added API schema validation with Zod
-- and many more ...
