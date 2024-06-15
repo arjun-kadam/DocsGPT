@@ -1,13 +1,7 @@
-# DocsGPT - Chat With Docs Using LLM
+<h1 align="center"> DocsGPT - Chat With PDF Using LLM </h1>
 
-## Project Group Members
-- Arjun Kadam
-- Simran Pathan
-- Vaibhav Pandarkar
-- Vaishnavi Raykar
-
-## Mentor 
-- Prof. Swati Bhosale
+<p align="center"><b>Chat with Documents using LLM</b> revolutionizes information retrieval by using Large Language Models like GPT-3.5 to enable dynamic, conversational interactions with documents. This approach surpasses traditional keyword-based searches, allowing users to naturally extract insights, summaries, and specific information.</p>
+<hr>
 
 ## Tech Stack
 
@@ -54,4 +48,13 @@ pnpm run build
 # start production server
 pnpm run start
 ```
+
+## Project Group Members
+- Arjun Kadam
+- Simran Pathan
+- Vaibhav Pandarkar
+- Vaishnavi Raykar
+
+## Mentor 
+- Prof. Swati Bhosale
 
