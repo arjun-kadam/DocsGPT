@@ -1,7 +1,8 @@
 import { db } from '@/lib/db'
 import { userSubscriptions } from '@/lib/db/schema'
 import { stripe } from '@/lib/stripe'
-import { auth, currentUser } from '@clerk/nextjs'
+import { auth } from "@clerk/nextjs/server";
+import {  currentUser } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 
