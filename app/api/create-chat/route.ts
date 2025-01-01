@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { loadS3IntoPinecone } from '@/lib/pinecone'
+import { loadS3IntoSupabase } from '@/lib/pinecone'
 import { db } from '@/lib/db'
 import { chats } from '@/lib/db/schema'
-import { auth } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { z } from 'zod'
 
 const postBodySchema = z.object({
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { fileKey } = postBody
-    await loadS3IntoPinecone(fileKey)
+    await loadS3IntoSupabase(fileKey)
 
     const returns = await db
       .insert(chats)

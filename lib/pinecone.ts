@@ -1,10 +1,7 @@
-import { Pinecone, PineconeRecord } from '@pinecone-database/pinecone'
+import { createClient } from '@supabase/supabase-js'
 import { downloadFromS3 } from './s3-server'
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-import {
-  Document,
-  RecursiveCharacterTextSplitter,
-} from '@pinecone-database/doc-splitter'
+import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf'
+import { Document, RecursiveCharacterTextSplitter } from '@pinecone-database/doc-splitter'
 import { getEmbeddings } from './embeddings'
 import md5 from 'md5'
 
@@ -16,49 +13,67 @@ interface PDFPage {
   }
 }
 
-type IndexSignature = {
-  [key: string]: any
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+)
+
+/**
+ * Load a PDF file from S3, process it, and store its content in Supabase.
+ * @param {string} fileKey - The key of the file in S3.
+ */
+async function loadS3IntoSupabase(fileKey: string) {
+  try {
+    
+    console.log('Downloading S3 object to file system...')
+    const localFile = await downloadFromS3(fileKey)
+
+    if (!localFile) {
+      throw new Error('Failed to download file from S3')
+    }
+
+    
+    const loader = new PDFLoader(localFile)
+    const pages = (await loader.load()) as PDFPage[]
+
+    
+    const documents = await prepareDocuments(pages)
+
+    
+    const vectors = await Promise.all(documents.flat().map(embedDocument))
+    const records = vectors.map((vector) => ({
+      ...vector,
+      metadata: { ...vector.metadata, fileKey },
+    }))
+
+    
+    const { data, error } = await supabase.from('vectors').upsert(records)
+
+    if (error) throw error
+
+    console.log('Data successfully uploaded to Supabase')
+  } catch (error) {
+    console.error('Error processing and uploading to Supabase:', error)
+    throw error
+  }
 }
 
-export interface PineconeRecordMetadata {
-  fileKey: string
-  pageNumber: number
-  text: string
-}
-
-const pinecone = new Pinecone({
-  environment: process.env.PINECONE_ENVIRONMENT!,
-  apiKey: process.env.PINECONE_API_KEY!,
-})
-
-async function loadS3IntoPinecone(fileKey: string) {
-  // 1. obtain pdf
-  console.log('Downloading S3 object to file system...')
-  const localFile = await downloadFromS3(fileKey)
-
-  if (!localFile) throw new Error('Cannot download from S3')
-  const loader = new PDFLoader(localFile)
-  const pages = (await loader.load()) as PDFPage[]
-
-  // 2. split and segment the pdf into smaller documents
-  const documents = await prepareDocuments(pages)
-
-  // 3. vectorize and embed individual documents
-  const vectors = await Promise.all(documents.flat().map(embedDocument))
-  const records = vectors.map((vector) => ({
-    ...vector,
-    metadata: { ...vector.metadata, fileKey },
-  })) as PineconeRecord<PineconeRecordMetadata & IndexSignature>[]
-
-  // 4. upload to pinecone
-  await pinecone.index(process.env.PINECONE_INDEX_NAME!).upsert(records)
-}
-
+/**
+ * Truncate a string to a specified number of bytes.
+ * @param {string} str - The string to truncate.
+ * @param {number} bytes - The maximum number of bytes.
+ * @returns {string} - The truncated string.
+ */
 function truncateStringByBytes(str: string, bytes: number) {
-  const enc = new TextEncoder()
-  return new TextDecoder('utf-8').decode(enc.encode(str).slice(0, bytes))
+  const encoder = new TextEncoder()
+  return new TextDecoder('utf-8').decode(encoder.encode(str).slice(0, bytes))
 }
 
+/**
+ * Prepare documents by splitting PDF pages into smaller chunks.
+ * @param {PDFPage[]} pages - The pages of the PDF.
+ * @returns {Promise<Document[]>} - The split documents.
+ */
 async function prepareDocuments(pages: PDFPage[]) {
   const splitter = new RecursiveCharacterTextSplitter()
   return await splitter.splitDocuments(
@@ -68,13 +83,18 @@ async function prepareDocuments(pages: PDFPage[]) {
           pageContent,
           metadata: {
             pageNumber: metadata.loc.pageNumber,
-            text: truncateStringByBytes(pageContent, 36_000),
+            text: truncateStringByBytes(pageContent, 36_000), // Limit size for embedding
           },
         })
     )
   )
 }
 
+/**
+ * Generate embeddings for a document and create a vector.
+ * @param {Document} doc - The document to process.
+ * @returns {Promise<any>} - The vector with embeddings and metadata.
+ */
 async function embedDocument(doc: Document) {
   try {
     const embeddings = await getEmbeddings(doc.pageContent)
@@ -82,16 +102,16 @@ async function embedDocument(doc: Document) {
 
     return {
       id: hash,
-      values: embeddings,
+      vector: embeddings,
       metadata: {
         pageNumber: doc.metadata.pageNumber as number,
         text: doc.metadata.text as string,
       },
     }
   } catch (error) {
-    console.log('Error embedding documents', error)
+    console.error('Error embedding document:', error)
     throw error
   }
 }
 
-export { loadS3IntoPinecone }
+export { loadS3IntoSupabase }

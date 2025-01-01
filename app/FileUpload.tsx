@@ -1,56 +1,56 @@
-'use client'
+"use client";
 
-import { uploadToS3 } from '@/lib/s3'
-import { Inbox, Loader2 } from 'lucide-react'
-import { useState } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { toast } from 'react-hot-toast'
-import { createChat } from './utils'
-import { useRouter } from 'next/navigation'
+import { uploadToS3 } from "@/lib/s3";
+import { Inbox, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { toast } from "react-hot-toast";
+import { createChat } from "./utils";
+import { useRouter } from "next/navigation";
 
 const FileUpload = () => {
-  const [isUploading, setIsUploading] = useState(false)
-  const [isCreatingChat, setIsCreatingChat] = useState(false)
-  const router = useRouter()
+  const [isUploading, setIsUploading] = useState(false);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const router = useRouter();
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
-      'application/pdf': ['.pdf'],
+      "application/pdf": [".pdf"],
     },
     maxFiles: 1,
     onDrop: async (acceptedFiles) => {
-      const file = acceptedFiles[0]
+      const file = acceptedFiles[0];
       if (file.size > 10 * 1024 * 1024) {
-        toast.error('File too large (limit: 10MB)')
-        return
+        toast.error("File too large (limit: 10MB)");
+        return;
       }
 
       try {
-        setIsUploading(true)
-        const fileKey = await uploadToS3(acceptedFiles[0])
-        toast.success('File uploaded successfully!')
+        setIsUploading(true);
+        const fileKey = await uploadToS3(acceptedFiles[0]);
+        toast.success("File uploaded successfully!");
 
-        setIsCreatingChat(true)
-        const chatId = await createChat(fileKey)
-        toast.success('Chat created successfully!')
+        setIsCreatingChat(true);
+        const chatId = await createChat(fileKey);
+        toast.success("Chat created successfully!");
 
-        router.push(`/chat/${chatId}`)
+        router.push(`/chat/${chatId}`);
       } catch (err) {
-        toast.error('Something went wrong ...')
-        console.log(err)
+        toast.error("Something went wrong ...");
+        console.log(err);
       } finally {
-        setIsUploading(false)
-        setIsCreatingChat(false)
+        setIsUploading(false);
+        setIsCreatingChat(false);
       }
     },
-  })
+  });
 
   return (
     <div className="p-2 bg-white rounded-2xl">
       <div
         {...getRootProps({
           className:
-            'border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-8 flex justify-center items-center flex-col hover:border-blue-300 focus:border-blue-300 focus:border-solid outline-none',
+            "border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-8 flex justify-center items-center flex-col hover:border-blue-300 focus:border-blue-300 focus:border-solid outline-none",
         })}
       >
         <input {...getInputProps()} />
@@ -67,7 +67,7 @@ const FileUpload = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FileUpload
+export default FileUpload;

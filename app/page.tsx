@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { UserButton, auth } from '@clerk/nextjs'
+import { UserButton} from '@clerk/nextjs'
+import { auth } from "@clerk/nextjs/server";
 import { ArrowRight, LogIn } from 'lucide-react'
 import Link from 'next/link'
 import FileUpload from './FileUpload'
